@@ -8,9 +8,11 @@ import (
 )
 
 const (
+	//常用的时间格式串
 	TimeFormat = "2006-01-02 15:04:05"
 )
 
+//算术相加，返回float64
 func Add(params ...interface{}) (result float64) {
 	if len(params) > 0 {
 		result = 0
@@ -21,6 +23,7 @@ func Add(params ...interface{}) (result float64) {
 	return
 }
 
+//算术相减，返回float64
 func Div(params ...interface{}) (result float64) {
 	if len(params) > 0 {
 		result = AsFloat64(params[0])
@@ -30,6 +33,8 @@ func Div(params ...interface{}) (result float64) {
 	}
 	return
 }
+
+//最传入参数中的最大值，返回float64
 func Max(params ...interface{}) (result float64) {
 	if len(params) > 0 {
 		result = AsFloat64(params[0])
@@ -41,6 +46,8 @@ func Max(params ...interface{}) (result float64) {
 	}
 	return
 }
+
+//取传入参数中的最小值，返回float64
 func Min(params ...interface{}) (result float64) {
 	if len(params) > 0 {
 		result = AsFloat64(params[0])
@@ -52,6 +59,8 @@ func Min(params ...interface{}) (result float64) {
 	}
 	return
 }
+
+//将无指定类型的参数格式化为字符串，时间格式为标准格式，见常定义TimeFormat = "2006-01-02 15:04:05"
 func AsString(src interface{}) string {
 	switch v := src.(type) {
 	case string:
@@ -67,6 +76,8 @@ func AsString(src interface{}) string {
 	}
 	return fmt.Sprintf("%v", src)
 }
+
+//将无指定类型的参数转化为float64
 func AsFloat64(src interface{}) (result float64) {
 	result = 0
 	switch src.(type) {
@@ -97,6 +108,8 @@ func AsFloat64(src interface{}) (result float64) {
 	}
 	return
 }
+
+//将无指定类型的参数转化为int64
 func AsInt64(src interface{}) (result int64) {
 	result = 0
 	switch src.(type) {
@@ -123,6 +136,8 @@ func AsInt64(src interface{}) (result int64) {
 	}
 	return
 }
+
+//将无指定类型的参数转化为int
 func AsInt(src interface{}) (result int) {
 	result = 0
 	switch v := src.(type) {
@@ -153,6 +168,8 @@ func AsInt(src interface{}) (result int) {
 	}
 	return
 }
+
+//对float64的数字截取小数，四舍五入
 func Round(val float64, places int) float64 {
 	var t float64
 	f := math.Pow10(places)
@@ -180,6 +197,8 @@ func Round(val float64, places int) float64 {
 
 	return t
 }
+
+//判断参数是否可转化为数字
 func IsNumber(src interface{}) bool {
 	switch v := src.(type) {
 	case int8, int16, int32, int64, uint8, uint16, uint32, uint64, float32, float64:

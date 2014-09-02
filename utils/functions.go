@@ -78,8 +78,10 @@ func AsString(src interface{}) string {
 }
 
 //将无指定类型的参数转化为float64
-func AsFloat64(src interface{}) (result float64) {
-	result = 0
+func AsFloat64(src interface{}, defaultValue ...float64) (result float64) {
+	if len(defaultValue) > 0 {
+		result = defaultValue[0]
+	}
 	switch src.(type) {
 	case float64:
 		result = src.(float64)
@@ -110,8 +112,10 @@ func AsFloat64(src interface{}) (result float64) {
 }
 
 //将无指定类型的参数转化为int64
-func AsInt64(src interface{}) (result int64) {
-	result = 0
+func AsInt64(src interface{}, defaultValue ...int64) (result int64) {
+	if len(defaultValue) > 0 {
+		result = defaultValue[0]
+	}
 	switch src.(type) {
 	case int8:
 		result = int64(src.(int8))
@@ -138,8 +142,10 @@ func AsInt64(src interface{}) (result int64) {
 }
 
 //将无指定类型的参数转化为int
-func AsInt(src interface{}) (result int) {
-	result = 0
+func AsInt(src interface{}, defaultValue ...int) (result int) {
+	if len(defaultValue) > 0 {
+		result = defaultValue[0]
+	}
 	switch v := src.(type) {
 	case int8:
 		result = int(v)

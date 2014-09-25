@@ -15,6 +15,17 @@ type Point struct {
 	X, Y float64
 }
 
+//环
+type Rings struct {
+	Points []*Point
+}
+
+//复杂环
+type MultiPoint struct {
+	BoundPoints  []*Point
+	InsidePoints []*Rings
+}
+
 //一个矩形
 type Box struct {
 	MinX, MinY, MaxX, MaxY float64
@@ -76,7 +87,7 @@ func PtInPolygon(p *Point, ptPolygon []*Point) bool {
 }
 
 //取一组点的最大范围
-func getBoundingBox(poly []*Point) (box *Box) {
+func GetBoundingBox(poly []*Point) (box *Box) {
 	n := len(poly)
 	box = new(Box)
 	if n == 0 {
@@ -89,14 +100,12 @@ func getBoundingBox(poly []*Point) (box *Box) {
 	for i := 1; i < n; i++ {
 		if poly[i].X > box.MaxX {
 			box.MaxX = poly[i].X
-		}
-		if poly[i].X < box.MinX {
+		} else if poly[i].X < box.MinX {
 			box.MinX = poly[i].X
 		}
 		if poly[i].Y > box.MaxY {
 			box.MaxY = poly[i].Y
-		}
-		if poly[i].Y < box.MinY {
+		} else if poly[i].Y < box.MinY {
 			box.MinY = poly[i].Y
 		}
 	}
@@ -105,6 +114,8 @@ func getBoundingBox(poly []*Point) (box *Box) {
 
 //判断点在Bounding Box以内还是以外。
 func pOutsideBoundingBox(box *Box, p *Point) bool {
+	//log.Println(p.X, p.Y)
+	//log.Println(box.MinX, box.MinY, box.MaxX, box.MaxY)
 	if p.X < box.MinX || p.X > box.MaxX {
 		return true
 	}
@@ -196,8 +207,11 @@ func PointInside(q *Point, poly []*Point) int {
 	var i, k int
 	var dy, dx, dy2, dx2 float64
 	var shift_rd float64
-	box := getBoundingBox(poly)
-	//log.Println(box)
+	box := GetBoundingBox(poly)
+	//for i, p := range poly {
+	//	log.Println(i, p.X, p.Y)
+	//}
+	//log.Println(pOutsideBoundingBox(box, q))
 	//check 1 -- BoundingBox check
 	if pOutsideBoundingBox(box, q) {
 		return 0
@@ -214,8 +228,6 @@ func PointInside(q *Point, poly []*Point) int {
 	if flag_online == 1 {
 		return 2
 	}
-	// make qi[1]
-
 	qi[1].X = box.MinX - 1.0
 	qi[1].Y = q.Y
 	qi[2].X = box.MaxX + 1.0
@@ -243,7 +255,6 @@ func PointInside(q *Point, poly []*Point) int {
 			break
 		}
 	}
-
 	if flag == 0 {
 		goto Lab_K
 	}
@@ -377,4 +388,61 @@ Lab_K:
 		// printf("point Q is outside of the polygon\n");
 		return 0
 	}
+}
+
+//判断点在复杂面内
+//两种基本类型，组合和镂空，组合是判断不相交，镂空是判断相交
+func PointInsidePolygon3(p *Point, poly []*Rings) bool {
+	alone := make(map[int]*Rings)
+	multi := make(map[int]*MultiPoint)
+	//首先找出与所有环不相交的环，和与其它环相交的环
+	for i, r := range poly {
+		ps := r.Points
+		if len(ps) == 0 {
+			continue
+		}
+		for j, jr := range poly {
+			if i != j { //跳过自己
+				if PointInsidePolygon2(ps[0], jr.Points) { //如果第一个点与一个面相交,认为它是内环
+					if mp, ok := multi[j]; !ok {
+						mp = new(MultiPoint)
+						mp.BoundPoints = jr.Points
+						mp.InsidePoints = append(mp.InsidePoints, r)
+						multi[j] = mp
+					} else {
+						mp.InsidePoints = append(mp.InsidePoints, r)
+					}
+					goto inside //直接跳出
+				}
+			}
+		}
+		//如果未与任何环相交，加到alone
+		alone[i] = r
+	inside: //如果与某一个环相交
+	}
+	//去掉两者中重复的
+	for i, _ := range alone {
+		if _, ok := multi[i]; ok {
+			delete(alone, i)
+		}
+	}
+	println(len(alone), len(multi))
+	//与其它环不相交的环，有一个判定就可以
+	for _, ps := range alone {
+		if PointInsidePolygon2(p, ps.Points) {
+			return true
+		}
+	}
+	//有相交的环，bound是最外环，去掉所有里面的环
+	for _, mps := range multi {
+		if PointInsidePolygon2(p, mps.BoundPoints) { //在大环内
+			for _, ps := range mps.InsidePoints { //不在小环内
+				if PointInsidePolygon2(p, ps.Points) {
+					return false
+				}
+			}
+			return true
+		}
+	}
+	return false
 }

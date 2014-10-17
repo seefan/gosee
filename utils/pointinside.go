@@ -390,6 +390,24 @@ Lab_K:
 	}
 }
 
+//判断面在面内，至少判断3个点，并且不在一条线上
+func PointsInsidePoints(ps, dst []*Point) bool {
+	if len(ps) > 2 && len(dst) > 2 { //至少3个点
+		if JudgePtInLine(ps[0], ps[1], ps[2]) == false { //不在一条线上
+			c := 0
+			for i := 0; i < 3; i++ { //判断3个点
+				if PointInsidePolygon2(ps[i], dst) {
+					c += 1
+				}
+			}
+			if c == 3 {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 //判断点在复杂面内
 //两种基本类型，组合和镂空，组合是判断不相交，镂空是判断相交
 func PointInsidePolygon3(p *Point, poly []*Rings) bool {
@@ -403,7 +421,7 @@ func PointInsidePolygon3(p *Point, poly []*Rings) bool {
 		}
 		for j, jr := range poly {
 			if i != j { //跳过自己
-				if PointInsidePolygon2(ps[0], jr.Points) { //如果第一个点与一个面相交,认为它是内环
+				if PointsInsidePoints(ps, jr.Points) { //如果第一个点与一个面相交,认为它是内环
 					if mp, ok := multi[j]; !ok {
 						mp = new(MultiPoint)
 						mp.BoundPoints = jr.Points
@@ -426,17 +444,21 @@ func PointInsidePolygon3(p *Point, poly []*Rings) bool {
 			delete(alone, i)
 		}
 	}
-	println(len(alone), len(multi))
+	//println("alone", len(alone))
+	//println(len(alone), len(multi))
 	//与其它环不相交的环，有一个判定就可以
 	for _, ps := range alone {
 		if PointInsidePolygon2(p, ps.Points) {
 			return true
 		}
 	}
+	//println("multi")
 	//有相交的环，bound是最外环，去掉所有里面的环
 	for _, mps := range multi {
 		if PointInsidePolygon2(p, mps.BoundPoints) { //在大环内
+			//println("inside big")
 			for _, ps := range mps.InsidePoints { //不在小环内
+				//println("check inside", PointInsidePolygon2(p, ps.Points))
 				if PointInsidePolygon2(p, ps.Points) {
 					return false
 				}

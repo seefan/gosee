@@ -58,7 +58,7 @@ func ZipDir(dir, file string) error {
 	w := zip.NewWriter(dstFile)
 	//psr := string(os.PathSeparator)
 	err = filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-		if info.IsDir() {
+		if info == nil || info.IsDir() {
 			return nil
 		}
 		f, err := w.Create(path)

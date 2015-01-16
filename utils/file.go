@@ -81,3 +81,20 @@ func CopyFile(src, dstPath string) error {
 	}
 	return nil
 }
+
+//生成不存在的路径
+func MakeDirs(file string) error {
+	psr := string(os.PathSeparator)
+	n := strings.LastIndex(file, psr)
+	if n > 0 {
+		file = SubString(file, 0, n)
+	}
+	if ExistsFile(file) {
+		return nil
+	}
+	err := os.MkdirAll(file, 0766)
+	if err != nil {
+		return goerr.NewError(err, "创建目录%s 时出错", file)
+	}
+	return nil
+}

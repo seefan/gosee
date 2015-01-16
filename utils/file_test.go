@@ -17,3 +17,9 @@ func Test_copyfile(t *testing.T) {
 		t.Error(err)
 	}
 }
+func Test_makedir(t *testing.T) {
+	err := MakeDirs("./dfds/ds")
+	if err != nil {
+		t.Error(err)
+	}
+}

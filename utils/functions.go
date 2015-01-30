@@ -219,11 +219,14 @@ func IsNumber(src interface{}) bool {
 }
 
 //截断字符串
-func SubString(str string, begin, length int) (substr string) {
+func SubString(str string, begin int, length ...int) (substr string) {
 	// 将字符串的转换成[]rune
 	rs := []rune(str)
 	lth := len(rs)
-
+	size := 0
+	if len(length) > 0 {
+		size = length[0]
+	}
 	// 简单的越界判断
 	if begin < 0 {
 		begin = 0
@@ -231,7 +234,10 @@ func SubString(str string, begin, length int) (substr string) {
 	if begin >= lth {
 		begin = lth
 	}
-	end := begin + length
+	end := lth
+	if size > 0 {
+		end = begin + size
+	}
 	if end > lth {
 		end = lth
 	}
